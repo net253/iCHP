@@ -52,7 +52,10 @@ $routes->post('/auth/forgot-password', 'AuthController::forgotPassword');
 // api RequestController.php  
 $routes->post('/Request/create-requestform', 'RequestController::createRequestForm');
 $routes->post('/Request/add-useraccount', 'RequestController::addUserAccount');
+$routes->post('/Request/delete-useraccount', 'RequestController::deleteuserAccounts');
 $routes->post('/Request/approve-status', 'RequestController::approveStatus');
+$routes->post('/Request/operator-status', 'RequestController::operatorStatus');
+$routes->post('/Request/software-status', 'RequestController::softwareStatus');
 $routes->get('/Request/request-list', 'RequestController::RequestList');
 $routes->get('/Request/request-detail', 'RequestController::RequestDetail');
 
