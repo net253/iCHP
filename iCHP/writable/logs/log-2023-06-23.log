@@ -1,0 +1,7 @@
+CRITICAL - 2023-06-23 00:58:03 --> Class "Kint\Renderer\Renderer" not found
+in SYSTEMPATH\Config\Factories.php on line 113.
+ 1 SYSTEMPATH\Common.php(216): CodeIgniter\Config\Factories::__callStatic('config', [])
+ 2 SYSTEMPATH\CodeIgniter.php(272): config('Config\\Kint')
+ 3 SYSTEMPATH\CodeIgniter.php(237): CodeIgniter\CodeIgniter->configureKint()
+ 4 SYSTEMPATH\CodeIgniter.php(199): CodeIgniter\CodeIgniter->initializeKint()
+ 5 FCPATH\index.php(66): CodeIgniter\CodeIgniter->initialize()

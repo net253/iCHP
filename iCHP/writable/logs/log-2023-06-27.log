@@ -1,0 +1,6 @@
+CRITICAL - 2023-06-27 00:55:39 --> Object of class stdClass could not be converted to string
+in APPPATH\Controllers\AppointmentController.php on line 1017.
+ 1 SYSTEMPATH\CodeIgniter.php(932): App\Controllers\AppointmentController->AssessmentParticipants()
+ 2 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AppointmentController))
+ 3 SYSTEMPATH\CodeIgniter.php(366): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 FCPATH\index.php(78): CodeIgniter\CodeIgniter->run()
