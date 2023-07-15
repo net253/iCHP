@@ -26,17 +26,11 @@ class RequestController extends BaseController
      public function createRequestForm()
      {
           try {
-               //! Request validation
-               //! JWT
-               $header = $this->request->getServer('HTTP_AUTHORIZATION');
-               $jwt = $this->jwtUtils->verifyToken($header);
-               if (!$jwt->state) return $this->response->setStatusCode(401)->setJSON(['state' => false, 'msg' => 'ปฏิเสธการเข้าถึง API']);
-               $decoded = $jwt->decoded;
           
                $EmployeeNumber      = $this->request->getVar("EmployeeNumber");
                $PetitionerName      = $this->request->getVar("PetitionerName");
                $SNCCompany          = $this->request->getVar("SNCCompany");
-               $AgencyName          = $this->request->getVar("AgencyName");
+               $Department          = $this->request->getVar("Department");
                $Phone               = $this->request->getVar("Phone");
                $WebsiteName         = $this->request->getVar("WebsiteName");
                $RequestType         = $this->request->getVar("RequestType");
@@ -44,11 +38,11 @@ class RequestController extends BaseController
                $OperationDate       = $this->request->getVar("OperationDate");
                $ManagerFullName     = $this->request->getVar("ManagerFullName");
                $ManagerEmail        = $this->request->getVar("ManagerEmail");
-               
+               $InformationRequire  = $this->request->getVar("InformationRequire");
 
-               $validate =  is_null($EmployeeNumber )    || is_null($PetitionerName)    || is_null($SNCCompany)    || is_null($AgencyName)           ||         
-                              is_null($Phone)              || is_null($WebsiteName)       || is_null($RequestType)   || is_null($RequirementDetails)   ||
-                              is_null($OperationDate)      || is_null($ManagerFullName)   || is_null($ManagerEmail);
+               $validate =  is_null($EmployeeNumber )    || is_null($PetitionerName)    || is_null($SNCCompany)    || is_null($Department)           ||         
+                            is_null($Phone)              || is_null($WebsiteName)       || is_null($RequestType)   || is_null($RequirementDetails)   ||
+                            is_null($OperationDate)      || is_null($ManagerFullName)   || is_null($ManagerEmail);
                
                if ($validate) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "กรอกข้อมูลไม่ครบถ้วน"]);
 
@@ -58,7 +52,7 @@ class RequestController extends BaseController
                     "EmployeeNumber"      =>  $EmployeeNumber,
                     "PetitionerName"      =>  $PetitionerName,
                     "SNCCompany"          =>  $SNCCompany,
-                    "AgencyName"          =>  $AgencyName,
+                    "Department"          =>  $Department,
                     "Phone"               =>  $Phone,
                     "WebsiteName"         =>  $WebsiteName,
                     "RequestType"         =>  $RequestType,
@@ -67,96 +61,78 @@ class RequestController extends BaseController
                     "CreatedDT"           =>  $this->MongoDBUTCDateTime($now->getTimestamp()*1000),
                     "ManagerFullName"     =>  $ManagerFullName,
                     "ManagerEmail"        =>  $ManagerEmail,
-                    "IsApprove"           =>  null,
                     "ApprovalDT"          =>  null,
                     "ManagerRemarks"      =>  null,
+                    "SatisfyScore"        =>  null,
+                    "IsApprove"           =>  null,
                     "IsApproveOperator"   =>  null,
                     "OperatorApproveDT"   =>  null,
                     "OperatorRemarks"     =>  null,
                     "IsApproveSoftware"   =>  null,
                     "SoftwareApproveDT"   =>  null,
                     "SoftwareRemarks"     =>  null,
+                    "InformationRequire"  =>  $InformationRequire,
                     "SendRequesttoApprovtorDT" =>  null,
-                    "InformationRequire"  =>  array()
                ]; 
 
                $this->dbiPMS->selectCollection("iCHP")->insertOne($data);
-          
+
+                // filter user from iCHP_Accounts collection for check users
+                $pipeline = [
+                    [
+                    '$match' => [
+                         'EmployeeNumber' => "$EmployeeNumber"
+                         ]
+                    ],
+                    [
+                    '$project' => [
+                         '_id' => 0, 
+                         'AccountID' => ['$toString' => '$_id'], 
+                         'EmployeeNumber' => 1, 
+                         'PetitionerName' => 1, 
+                         ]
+                    ]
+               ];
+               $result = $this->dbiPMS->selectCollection("iCHP_Accounts")->aggregate($pipeline);
+
+               $users = array();
+               foreach ($result as $doc) array_push($users, $doc);
+
+               // Check users before insert or update data into collection
+                if (empty($users)) {  // insert data
+                    $data2 = [
+                         "EmployeeNumber"      =>  $EmployeeNumber,
+                         "PetitionerName"      =>  $PetitionerName,
+                         "SNCCompany"          =>  $SNCCompany,
+                         "Department"          =>  $Department,
+                         "Phone"               =>  $Phone,
+                    ];
+                    $this->dbiPMS->selectCollection("iCHP_Accounts")->insertOne($data2);
+                } else { // update data
+                    $filter = ["EmployeeNumber" => "$EmployeeNumber"];
+                    $dataforUpdate = [
+                         "PetitionerName"      =>  $PetitionerName,
+                         "SNCCompany"          =>  $SNCCompany,
+                         "Department"          =>  $Department,
+                         "Phone"               =>  $Phone,
+                    ];
+                    $this->dbiPMS->selectCollection("iCHP_Accounts")->updateOne($filter, ['$set' => $dataforUpdate]);
+                }
+              
                return $this->response->setJSON(["state" => true, "msg" => "สร้างคำร้องขอสำเร็จ"]);
           } catch (\Exception $e) {
                return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
           }
      }
 
-     //TODO [POST] /Request/add-useraccount
-     public function addUserAccount()
+     //TODO [POST] /Request/satisfy-score
+     public function SatisfyScore()
      {
-           //! Request validation
-               //! JWT
-               $header = $this->request->getServer('HTTP_AUTHORIZATION');
-               $jwt = $this->jwtUtils->verifyToken($header);
-               if (!$jwt->state) return $this->response->setStatusCode(401)->setJSON(['state' => false, 'msg' => 'ปฏิเสธการเข้าถึง API']);
-               $decoded = $jwt->decoded;
-
           try {
-               $RequestID      = $this->request->getVar("RequestID");
-               $InformationRequire  = $this->request->getVar("InformationRequire");
-
-               $validate =  is_null($RequestID ) || is_null($InformationRequire);
-
-               if ($validate) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "กรอกข้อมูลไม่ครบถ้วน"]);
-
-               $pipeline = [
-                    [
-                         '$match' => [
-                         '_id' => $this->MongoDBObjectId($RequestID)
-                         ]
-                    ], 
-                    [
-                         '$project' => [
-                         '_id' => 0, 
-                         'InformationRequire' => 1,
-                         ] 
-                    ]
-               ];
-               $result = $this->dbiPMS->selectCollection("iCHP")->aggregate($pipeline);
+               $RequestID    = $this->request->getVar("RequestID");
+               $SatisfyScore = $this->request->getVar("SatisfyScore");
                
-               $data = array();
-               foreach ($result as $doc) array_push($data, $doc);
-               
-               if (count($data)===0) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "ไม่มีข้อมูลในระบบ"]);
-
-               $filter = ["_id" => $this->MongoDBObjectId($RequestID)];
-               $AddUserAccounts = [
-                    "InformationRequire" =>  $InformationRequire,
-               ];
-               
-               $this->dbiPMS->selectCollection("iCHP")->updateOne($filter, ['$push' => $AddUserAccounts]); 
-
-               return $this->response->setJSON(["state" => true, "msg" => "เพิ่มรายชื่อผู้ใช้สำเร็จ"]);
-
-     } catch (\Exception $e) {
-               return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
-          }
-     }
-
-
-     //TODO [POST] /Request/approve-status
-     public function approveStatus()
-     {
-     try {
-               //! Request validation
-               //! JWT
-               $header = $this->request->getServer('HTTP_AUTHORIZATION');
-               $jwt = $this->jwtUtils->verifyToken($header);
-               if (!$jwt->state) return $this->response->setStatusCode(401)->setJSON(['state' => false, 'msg' => 'ปฏิเสธการเข้าถึง API']);
-               $decoded = $jwt->decoded;
-          
-               $RequestID       = $this->request->getVar("RequestID");
-               $IsApprove       = $this->request->getVar("IsApprove");
-               $ManagerRemarks  = $this->request->getVar("ManagerRemarks");
-               
-               $validate =  is_null($RequestID) || is_null($IsApprove);
+               $validate =  is_null($RequestID) || is_null($SatisfyScore);
           
                if ($validate) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "กรอกข้อมูลไม่ครบถ้วน"]);
 
@@ -164,30 +140,50 @@ class RequestController extends BaseController
 
                $filter = ["_id" => $this->MongoDBObjectId($RequestID)];
                $data = [
-                    "IsApprove"       =>  (boolean)$IsApprove,
-                    "ManagerRemarks"  =>  $ManagerRemarks,
-                    "ApprovalDT"      =>  $this->MongoDBUTCDateTime($now->getTimestamp()*1000),
+                    "SatisfyScore"  =>  $SatisfyScore,
                ];
 
                $this->dbiPMS->selectCollection("iCHP")->updateOne($filter, ['$set' => $data]);
           
-               return $this->response->setJSON(["state" => true, "msg" => "อัพเดตสถานะการอนุมัติแล้ว"]);
+               return $this->response->setJSON(["state" => true, "msg" => "บันทึกคะแนนแล้ว"]);
      } catch (\Exception $e) {
                return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
+          }
      }
-     }
+
+        //TODO [POST] /Request/approve-status
+        public function approveStatus()
+        {
+            try {
+                    $RequestID      = $this->request->getVar("RequestID");
+                    $IsApprove      = $this->request->getVar("IsApprove");
+                    $ManagerRemarks = $this->request->getVar("ManagerRemarks");
+                    
+                    $validate =  is_null($RequestID) || is_null($IsApprove);
+                 
+                   if ($validate) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "กรอกข้อมูลไม่ครบถ้วน"]);
+    
+                   $now = new \DateTime();
+   
+                   $filter = ["_id" => $this->MongoDBObjectId($RequestID)];
+                   $data = [
+                       "IsApprove"   =>  (boolean)$IsApprove,
+                       "ManagerRemarks"     =>  $ManagerRemarks,
+                       "ApprovalDT"   =>  $this->MongoDBUTCDateTime($now->getTimestamp()*1000),
+                   ];
+   
+                   $this->dbiPMS->selectCollection("iCHP")->updateOne($filter, ['$set' => $data]);
+              
+                    return $this->response->setJSON(["state" => true, "msg" => "อัพเดตสถานการดำเนินการแล้ว"]);
+            } catch (\Exception $e) {
+                    return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
+            }
+        }
 
      //TODO [POST] /Request/operator-status
      public function operatorStatus()
      {
          try {
-                 //! Request validation
-                 //! JWT
-                 $header = $this->request->getServer('HTTP_AUTHORIZATION');
-                 $jwt = $this->jwtUtils->verifyToken($header);
-                 if (!$jwt->state) return $this->response->setStatusCode(401)->setJSON(['state' => false, 'msg' => 'ปฏิเสธการเข้าถึง API']);
-                 $decoded = $jwt->decoded;
-             
                  $RequestID        = $this->request->getVar("RequestID");
                  $IsApproveOperator= $this->request->getVar("IsApproveOperator");
                  $OperatorRemarks  = $this->request->getVar("OperatorRemarks");
@@ -218,13 +214,6 @@ class RequestController extends BaseController
       public function softwareStatus()
       {
           try {
-                  //! Request validation
-                  //! JWT
-                  $header = $this->request->getServer('HTTP_AUTHORIZATION');
-                  $jwt = $this->jwtUtils->verifyToken($header);
-                  if (!$jwt->state) return $this->response->setStatusCode(401)->setJSON(['state' => false, 'msg' => 'ปฏิเสธการเข้าถึง API']);
-                  $decoded = $jwt->decoded;
-              
                   $RequestID        = $this->request->getVar("RequestID");
                   $IsApproveSoftware= $this->request->getVar("IsApproveSoftware");
                   $SoftwareRemarks  = $this->request->getVar("SoftwareRemarks");
@@ -252,23 +241,16 @@ class RequestController extends BaseController
      
 
      //TODO [GET] /Request/request-list
-     public function RequestList()
+     public function requestList()
      {
           try {
-               //! Request validation
-               //! JWT
-               $header = $this->request->getServer('HTTP_AUTHORIZATION');
-               $jwt = $this->jwtUtils->verifyToken($header);
-               if (!$jwt->state) return $this->response->setStatusCode(401)->setJSON(['state' => false, 'msg' => 'ปฏิเสธการเข้าถึง API']);
-               $decoded = $jwt->decoded;
-               
                $pipeline = [
                     ['$project' => [
                          '_id' => 0, 'RequestID' => ['$toString' => '$_id'], 'EmployeeNumber' => 1, 'PetitionerName' => 1, 
-                         'SNCCompany' => 1, 'AgencyName' => 1, 'Phone' => 1, 'WebsiteName' => 1, 'RequestType' => 1, 'RequirementDetails' => 1, 
+                         'SNCCompany' => 1, 'Department' => 1, 'Phone' => 1, 'WebsiteName' => 1, 'RequestType' => 1, 'RequirementDetails' => 1, 
                          'OperationDate' => 1, 'CreatedDT' => ['$dateToString' => ['date' => '$CreatedDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']], 
                          'InformationRequire' => 1, 'ManagerFullName' => 1, 'ManagerEmail' => 1, 'IsApprove' => 1, 'ApprovalDT' => 1, 'ManagerRemarks' => 1, 
-                         'OperatorFullName' => 1, 'SendRequesttoApprovtorDT' => 1, 'OperatorRemarks' => 1, 'SendRequesttoApprovtorDT' => 1
+                         'IsApproveOperator' => 1, 'OperatorApproveDT' => 1, 'OperatorRemarks' => 1, 'IsApproveSoftware' => 1, 'SoftwareApproveDT' => 1, 'SoftwareRemarks' => 1,  'SatisfyScore' => 1,
                          ]
                     ]
                ];
@@ -285,23 +267,10 @@ class RequestController extends BaseController
 
 
       //TODO [GET] /Request/request-detail
-      public function RequestDetail()
+      public function requestDetail()
       {
-            //! Request validation
-             //! JWT
-             $header = $this->request->getServer('HTTP_AUTHORIZATION');
-             $jwt = $this->jwtUtils->verifyToken($header);
-             if (!$jwt->state) return $this->response->setStatusCode(401)->setJSON(['state' => false, 'msg' => 'ปฏิเสธการเข้าถึง API']);
-             $decoded = $jwt->decoded;
 
            try {
-                //! Request validation
-                //! JWT
-                $header = $this->request->getServer('HTTP_AUTHORIZATION');
-                $jwt = $this->jwtUtils->verifyToken($header);
-                if (!$jwt->state) return $this->response->setStatusCode(401)->setJSON(['state' => false, 'msg' => 'ปฏิเสธการเข้าถึง API']);
-                $decoded = $jwt->decoded;
-
                 $RequestID = $this->request->getVar("RequestID"); 
 
                 $validate = is_null($RequestID); 
@@ -316,10 +285,10 @@ class RequestController extends BaseController
                                ],
                                ['$project' => [
                                     '_id' => 0, 'RequestID' => ['$toString' => '$_id'], 'EmployeeNumber' => 1, 'PetitionerName' => 1, 
-                                    'SNCCompany' => 1, 'AgencyName' => 1, 'Phone' => 1, 'WebsiteName' => 1, 'RequestType' => 1, 'RequirementDetails' => 1, 
+                                    'SNCCompany' => 1, 'Department' => 1, 'Phone' => 1, 'WebsiteName' => 1, 'RequestType' => 1, 'RequirementDetails' => 1, 
                                     'OperationDate' => 1, 'CreatedDT' => ['$dateToString' => ['date' => '$CreatedDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']], 
                                     'InformationRequire' => 1, 'ManagerFullName' => 1, 'ManagerEmail' => 1, 'IsApprove' => 1, 'ApprovalDT' => 1, 'ManagerRemarks' => 1, 
-                                    'OperatorFullName' => 1, 'SendRequesttoApprovtorDT' => 1, 'OperatorRemarks' => 1, 'SendRequesttoApprovtorDT' => 1
+                                    'IsApproveOperator' => 1, 'OperatorApproveDT' => 1, 'OperatorRemarks' => 1, 'IsApproveSoftware' => 1, 'SoftwareApproveDT' => 1, 'SoftwareRemarks' => 1,  'SatisfyScore' => 1,
                                     ]
                                ]
                           ];
@@ -333,6 +302,58 @@ class RequestController extends BaseController
                 return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
            }
       }
+
+
+     //TODO [GET] /Request/project-name
+     public function projectName()
+     {
+          try {
+               $pipeline = [
+                    ['$project' => [
+                         '_id' => 0, 'NameID' => ['$toString' => '$_id'], 
+                         'ProjectID' => 1, 
+                         'ProjectName' => 1 
+                         ]
+                    ]
+               ];
+               $result = $this->dbiPMS->selectCollection("iCHP_ProjectName")->aggregate($pipeline);
+
+               $data = array();
+               foreach ($result as $doc) array_push($data, $doc);
+
+               return $this->response->setJSON($data);   
+     }  catch (\Exception $e) {
+               return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
+          }
+     }
+
+
+     //TODO [GET] /Request/snccompany-list
+     public function sncCompanyList()
+     {
+          try {
+               $pipeline = [
+                    ['$project' => [
+                         '_id' => 0, 'CompanyID' => ['$toString' => '$_id'], 
+                         'ProjectID' => 1, 
+                         'Company' => 1 ,
+                         'CompanyFullName' => 1 ,
+                         'CompanyFullNameEN' => 1 ,
+                         'Department' => 1,
+                         ]
+                    ]
+               ];
+               $result = $this->dbiPMS->selectCollection("iCHP_SNCCompany")->aggregate($pipeline);
+
+               $data = array();
+               foreach ($result as $doc) array_push($data, $doc);
+
+               return $this->response->setJSON($data);   
+     }  catch (\Exception $e) {
+               return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
+          }
+     }
+
 
 }
 ?>
