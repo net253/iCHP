@@ -59,6 +59,7 @@ $routes->get('/Request/request-list', 'RequestController::requestList');
 $routes->get('/Request/request-detail', 'RequestController::requestDetail');
 $routes->get('/Request/project-name', 'RequestController::projectName');
 $routes->get('/Request/snccompany-list', 'RequestController::sncCompanyList');
+$routes->get('/Request/managername-list', 'RequestController::managerNameList');
 
 
 

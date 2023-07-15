@@ -23,6 +23,113 @@ class RequestController extends BaseController
      }
 
      //TODO [POST] /Request/create-requestform
+     // public function createRequestForm()
+     // {
+     //      try {
+          
+     //           $EmployeeNumber      = $this->request->getVar("EmployeeNumber");
+     //           $PetitionerName      = $this->request->getVar("PetitionerName");
+     //           $SNCCompany          = $this->request->getVar("SNCCompany");
+     //           $Department          = $this->request->getVar("Department");
+     //           $Phone               = $this->request->getVar("Phone");
+     //           $WebsiteName         = $this->request->getVar("WebsiteName");
+     //           $RequestType         = $this->request->getVar("RequestType");
+     //           $RequirementDetails  = $this->request->getVar("RequirementDetails");
+     //           $OperationDate       = $this->request->getVar("OperationDate");
+     //           $ManagerFullName     = $this->request->getVar("ManagerFullName");
+     //           $ManagerEmail        = $this->request->getVar("ManagerEmail");
+     //           $InformationRequire  = $this->request->getVar("InformationRequire");
+
+     //           $validate =  is_null($EmployeeNumber )    || is_null($PetitionerName)    || is_null($SNCCompany)    || is_null($Department)           ||         
+     //                        is_null($Phone)              || is_null($WebsiteName)       || is_null($RequestType)   || is_null($RequirementDetails)   ||
+     //                        is_null($OperationDate)      || is_null($ManagerFullName)   || is_null($ManagerEmail);
+               
+     //           if ($validate) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "กรอกข้อมูลไม่ครบถ้วน"]);
+
+     //           $now = new \DateTime();
+
+     //           $data = [
+     //                "EmployeeNumber"      =>  $EmployeeNumber,
+     //                "PetitionerName"      =>  $PetitionerName,
+     //                "SNCCompany"          =>  $SNCCompany,
+     //                "Department"          =>  $Department,
+     //                "Phone"               =>  $Phone,
+     //                "WebsiteName"         =>  $WebsiteName,
+     //                "RequestType"         =>  $RequestType,
+     //                "RequirementDetails"  =>  $RequirementDetails,
+     //                "OperationDate"       =>  $OperationDate,
+     //                "CreatedDT"           =>  $this->MongoDBUTCDateTime($now->getTimestamp()*1000),
+     //                "ManagerFullName"     =>  $ManagerFullName,
+     //                "ManagerEmail"        =>  $ManagerEmail,
+     //                "ApprovalDT"          =>  null,
+     //                "ManagerRemarks"      =>  null,
+     //                "SatisfyScore"        =>  null,
+     //                "IsApprove"           =>  null,
+     //                "IsApproveOperator"   =>  null,
+     //                "OperatorApproveDT"   =>  null,
+     //                "OperatorRemarks"     =>  null,
+     //                "IsApproveSoftware"   =>  null,
+     //                "SoftwareApproveDT"   =>  null,
+     //                "SoftwareRemarks"     =>  null,
+     //                "InformationRequire"  =>  $InformationRequire,
+     //                "SendRequesttoApprovtorDT" =>  null,
+     //           ]; 
+
+     //           $this->dbiPMS->selectCollection("iCHP")->insertOne($data);
+
+     //            // filter user from iCHP_Accounts collection for check users
+     //            $pipeline = [
+     //                [
+     //                '$match' => [
+     //                     'EmployeeNumber' => "$EmployeeNumber"
+     //                     ]
+     //                ],
+     //                [
+     //                '$project' => [
+     //                     '_id' => 0, 
+     //                     'AccountID' => ['$toString' => '$_id'], 
+     //                     'EmployeeNumber' => 1, 
+     //                     'PetitionerName' => 1, 
+     //                     'ManagerFullName' => 1, 
+     //                     'ManagerEmail' => 1, 
+     //                     ]
+     //                ]
+     //           ];
+     //           $result = $this->dbiPMS->selectCollection("iCHP_Accounts")->aggregate($pipeline);
+     //           $resultManager = $this->dbiPMS->selectCollection("iCHP_MangerName")->aggregate($pipeline);
+
+     //           $users = array();
+     //           foreach ($result as $doc) array_push($users, $doc);
+
+     //           // Check users before insert or update data into collection
+     //            if (empty($users)) {  // insert data
+     //                $data2 = [
+     //                     "EmployeeNumber"      =>  $EmployeeNumber,
+     //                     "PetitionerName"      =>  $PetitionerName,
+     //                     "SNCCompany"          =>  $SNCCompany,
+     //                     "Department"          =>  $Department,
+     //                     "Phone"               =>  $Phone,
+     //                ];
+     //                $this->dbiPMS->selectCollection("iCHP_Accounts")->insertOne($data2);
+     //            } else { // update data
+     //                $filter = ["EmployeeNumber" => "$EmployeeNumber"];
+     //                $dataforUpdate = [
+     //                     "PetitionerName"      =>  $PetitionerName,
+     //                     "SNCCompany"          =>  $SNCCompany,
+     //                     "Department"          =>  $Department,
+     //                     "Phone"               =>  $Phone,
+     //                ];
+     //                $this->dbiPMS->selectCollection("iCHP_Accounts")->updateOne($filter, ['$set' => $dataforUpdate]);
+     //            }
+              
+     //           return $this->response->setJSON(["state" => true, "msg" => "สร้างคำร้องขอสำเร็จ"]);
+     //      } catch (\Exception $e) {
+     //           return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
+     //      }
+     // }
+
+
+     //TODO [POST] /Request/create-requestform
      public function createRequestForm()
      {
           try {
@@ -40,9 +147,9 @@ class RequestController extends BaseController
                $ManagerEmail        = $this->request->getVar("ManagerEmail");
                $InformationRequire  = $this->request->getVar("InformationRequire");
 
-               $validate =  is_null($EmployeeNumber )    || is_null($PetitionerName)    || is_null($SNCCompany)    || is_null($Department)           ||         
-                            is_null($Phone)              || is_null($WebsiteName)       || is_null($RequestType)   || is_null($RequirementDetails)   ||
-                            is_null($OperationDate)      || is_null($ManagerFullName)   || is_null($ManagerEmail);
+               $validate =  is_null($EmployeeNumber )  || is_null($PetitionerName)    || is_null($SNCCompany)    || is_null($Department)           ||         
+                            is_null($Phone)            || is_null($WebsiteName)       || is_null($RequestType)   || is_null($RequirementDetails)   ||
+                            is_null($OperationDate)    || is_null($ManagerFullName)   || is_null($ManagerEmail);
                
                if ($validate) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "กรอกข้อมูลไม่ครบถ้วน"]);
 
@@ -77,8 +184,8 @@ class RequestController extends BaseController
 
                $this->dbiPMS->selectCollection("iCHP")->insertOne($data);
 
-                // filter user from iCHP_Accounts collection for check users
-                $pipeline = [
+               // filter user from iCHP_Accounts collection for check users
+               $pipeline = [
                     [
                     '$match' => [
                          'EmployeeNumber' => "$EmployeeNumber"
@@ -118,6 +225,45 @@ class RequestController extends BaseController
                     ];
                     $this->dbiPMS->selectCollection("iCHP_Accounts")->updateOne($filter, ['$set' => $dataforUpdate]);
                 }
+
+
+               // filter ManagerNames from iCHP_ManagerNames collection for check manager
+               $pipeline = [
+                    [
+                    '$match' => [
+                         'ManagerFullName' => "$ManagerFullName"
+                         ]
+                    ],
+                    [
+                    '$project' => [
+                         '_id' => 0, 
+                         'ManagerID' => ['$toString' => '$_id'], 
+                         'ManagerFullName' => 1, 
+                         'ManagerEmail' => 1, 
+                         ]
+                    ]
+               ];
+               $result = $this->dbiPMS->selectCollection("iCHP_ManagerNames")->aggregate($pipeline);
+
+               $managers = array();
+               foreach ($result as $doc) array_push($managers, $doc);
+
+               if (empty($managers)) {
+                    $data3 = [
+                         "EmployeeNumber"    =>  $EmployeeNumber,
+                         "ManagerFullName"   =>  $ManagerFullName,
+                         "ManagerEmail"      =>  $ManagerEmail,
+                    ];
+                    $this->dbiPMS->selectCollection("iCHP_ManagerNames")->insertOne($data3);
+               } else {
+                    $filter = ["EmployeeNumber" => "$EmployeeNumber"];
+                    $dataforUpdate = [
+                         "EmployeeNumber"    =>  $EmployeeNumber,
+                         "ManagerFullName"   =>  $ManagerFullName,
+                         "ManagerEmail"      =>  $ManagerEmail,
+                    ];
+                    $this->dbiPMS->selectCollection("iCHP_ManagerNames")->updateOne($filter, ['$set' => $dataforUpdate]);
+               }
               
                return $this->response->setJSON(["state" => true, "msg" => "สร้างคำร้องขอสำเร็จ"]);
           } catch (\Exception $e) {
@@ -151,34 +297,34 @@ class RequestController extends BaseController
           }
      }
 
-        //TODO [POST] /Request/approve-status
-        public function approveStatus()
-        {
-            try {
-                    $RequestID      = $this->request->getVar("RequestID");
-                    $IsApprove      = $this->request->getVar("IsApprove");
-                    $ManagerRemarks = $this->request->getVar("ManagerRemarks");
-                    
-                    $validate =  is_null($RequestID) || is_null($IsApprove);
-                 
-                   if ($validate) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "กรอกข้อมูลไม่ครบถ้วน"]);
-    
-                   $now = new \DateTime();
-   
-                   $filter = ["_id" => $this->MongoDBObjectId($RequestID)];
-                   $data = [
-                       "IsApprove"   =>  (boolean)$IsApprove,
-                       "ManagerRemarks"     =>  $ManagerRemarks,
-                       "ApprovalDT"   =>  $this->MongoDBUTCDateTime($now->getTimestamp()*1000),
-                   ];
-   
-                   $this->dbiPMS->selectCollection("iCHP")->updateOne($filter, ['$set' => $data]);
-              
-                    return $this->response->setJSON(["state" => true, "msg" => "อัพเดตสถานการดำเนินการแล้ว"]);
-            } catch (\Exception $e) {
-                    return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
-            }
-        }
+     //TODO [POST] /Request/approve-status
+     public function approveStatus()
+     {
+          try {
+               $RequestID      = $this->request->getVar("RequestID");
+               $IsApprove      = $this->request->getVar("IsApprove");
+               $ManagerRemarks = $this->request->getVar("ManagerRemarks");
+               
+               $validate =  is_null($RequestID) || is_null($IsApprove);
+               
+               if ($validate) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "กรอกข้อมูลไม่ครบถ้วน"]);
+
+               $now = new \DateTime();
+
+               $filter = ["_id" => $this->MongoDBObjectId($RequestID)];
+               $data = [
+                    "IsApprove"   =>  (boolean)$IsApprove,
+                    "ManagerRemarks"     =>  $ManagerRemarks,
+                    "ApprovalDT"   =>  $this->MongoDBUTCDateTime($now->getTimestamp()*1000),
+               ];
+
+               $this->dbiPMS->selectCollection("iCHP")->updateOne($filter, ['$set' => $data]);
+          
+               return $this->response->setJSON(["state" => true, "msg" => "อัพเดตสถานการดำเนินการแล้ว"]);
+          } catch (\Exception $e) {
+               return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
+          }
+     }
 
      //TODO [POST] /Request/operator-status
      public function operatorStatus()
@@ -249,8 +395,11 @@ class RequestController extends BaseController
                          '_id' => 0, 'RequestID' => ['$toString' => '$_id'], 'EmployeeNumber' => 1, 'PetitionerName' => 1, 
                          'SNCCompany' => 1, 'Department' => 1, 'Phone' => 1, 'WebsiteName' => 1, 'RequestType' => 1, 'RequirementDetails' => 1, 
                          'OperationDate' => 1, 'CreatedDT' => ['$dateToString' => ['date' => '$CreatedDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']], 
-                         'InformationRequire' => 1, 'ManagerFullName' => 1, 'ManagerEmail' => 1, 'IsApprove' => 1, 'ApprovalDT' => 1, 'ManagerRemarks' => 1, 
-                         'IsApproveOperator' => 1, 'OperatorApproveDT' => 1, 'OperatorRemarks' => 1, 'IsApproveSoftware' => 1, 'SoftwareApproveDT' => 1, 'SoftwareRemarks' => 1,  'SatisfyScore' => 1,
+                         'InformationRequire' => 1, 'ManagerFullName' => 1, 'ManagerEmail' => 1, 'IsApprove' => 1, 'ManagerRemarks' => 1, 
+                         'ApprovalDT' => ['$dateToString' => ['date' => '$ApprovalDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']],
+                         'IsApproveOperator' => 1, 'OperatorRemarks' => 1, 'IsApproveSoftware' => 1, 'SoftwareRemarks' => 1,  'SatisfyScore' => 1,
+                         'SoftwareApproveDT' => ['$dateToString' => ['date' => '$SoftwareApproveDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']],
+                         'OperatorApproveDT' => ['$dateToString' => ['date' => '$OperatorApproveDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']],
                          ]
                     ]
                ];
@@ -284,13 +433,16 @@ class RequestController extends BaseController
                                    ]
                                ],
                                ['$project' => [
-                                    '_id' => 0, 'RequestID' => ['$toString' => '$_id'], 'EmployeeNumber' => 1, 'PetitionerName' => 1, 
-                                    'SNCCompany' => 1, 'Department' => 1, 'Phone' => 1, 'WebsiteName' => 1, 'RequestType' => 1, 'RequirementDetails' => 1, 
-                                    'OperationDate' => 1, 'CreatedDT' => ['$dateToString' => ['date' => '$CreatedDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']], 
-                                    'InformationRequire' => 1, 'ManagerFullName' => 1, 'ManagerEmail' => 1, 'IsApprove' => 1, 'ApprovalDT' => 1, 'ManagerRemarks' => 1, 
-                                    'IsApproveOperator' => 1, 'OperatorApproveDT' => 1, 'OperatorRemarks' => 1, 'IsApproveSoftware' => 1, 'SoftwareApproveDT' => 1, 'SoftwareRemarks' => 1,  'SatisfyScore' => 1,
-                                    ]
-                               ]
+                                   '_id' => 0, 'RequestID' => ['$toString' => '$_id'], 'EmployeeNumber' => 1, 'PetitionerName' => 1, 
+                                   'SNCCompany' => 1, 'Department' => 1, 'Phone' => 1, 'WebsiteName' => 1, 'RequestType' => 1, 'RequirementDetails' => 1, 
+                                   'OperationDate' => 1, 'CreatedDT' => ['$dateToString' => ['date' => '$CreatedDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']], 
+                                   'InformationRequire' => 1, 'ManagerFullName' => 1, 'ManagerEmail' => 1, 'IsApprove' => 1, 'ManagerRemarks' => 1, 
+                                   'ApprovalDT' => ['$dateToString' => ['date' => '$ApprovalDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']],
+                                   'IsApproveOperator' => 1, 'OperatorRemarks' => 1, 'IsApproveSoftware' => 1, 'SoftwareRemarks' => 1,  'SatisfyScore' => 1,
+                                   'SoftwareApproveDT' => ['$dateToString' => ['date' => '$SoftwareApproveDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']],
+                                   'OperatorApproveDT' => ['$dateToString' => ['date' => '$OperatorApproveDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']],
+                                   ]
+                              ]
                           ];
                 $result = $this->dbiPMS->selectCollection("iCHP")->aggregate($pipeline);
  
@@ -322,7 +474,7 @@ class RequestController extends BaseController
                foreach ($result as $doc) array_push($data, $doc);
 
                return $this->response->setJSON($data);   
-     }  catch (\Exception $e) {
+          } catch (\Exception $e) {
                return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
           }
      }
@@ -344,6 +496,30 @@ class RequestController extends BaseController
                     ]
                ];
                $result = $this->dbiPMS->selectCollection("iCHP_SNCCompany")->aggregate($pipeline);
+
+               $data = array();
+               foreach ($result as $doc) array_push($data, $doc);
+
+               return $this->response->setJSON($data);   
+     }  catch (\Exception $e) {
+               return $this->response->setJSON(["state" => false, "msg" => $e->getMessage()]);
+          }
+     }
+
+
+     //TODO [GET] /Request/managername-list
+     public function managerNameList()
+     {
+          try {
+               $pipeline = [
+                    ['$project' => [
+                         '_id' => 0, 'ManagerID' => ['$toString' => '$_id'], 
+                         'ManagerFullName' => 1, 
+                         'ManagerEmail' => 1, 
+                         ]
+                    ]
+               ];
+               $result = $this->dbiPMS->selectCollection("iCHP_ManagerNames")->aggregate($pipeline);
 
                $data = array();
                foreach ($result as $doc) array_push($data, $doc);
