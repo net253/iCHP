@@ -51,15 +51,15 @@ $routes->post('/auth/forgot-password', 'AuthController::forgotPassword');
 
 // api RequestController.php  
 $routes->post('/Request/create-requestform', 'RequestController::createRequestForm');
-$routes->post('/Request/satisfy-score', 'RequestController::SatisfyScore');
 $routes->post('/Request/approve-status', 'RequestController::approveStatus');
 $routes->post('/Request/operator-status', 'RequestController::operatorStatus');
 $routes->post('/Request/software-status', 'RequestController::softwareStatus');
-$routes->get('/Request/request-list', 'RequestController::requestList');
+// $routes->get('/Request/request-list', 'RequestController::requestList');
+// $routes->get('/Request/score-list', 'RequestController::scoreList');
 $routes->get('/Request/request-detail', 'RequestController::requestDetail');
 $routes->get('/Request/project-name', 'RequestController::projectName');
 $routes->get('/Request/snccompany-list', 'RequestController::sncCompanyList');
-$routes->get('/Request/managername-list', 'RequestController::managerNameList');
+$routes->get('/Request/employee-list', 'RequestController::employeeList');
 
 
 

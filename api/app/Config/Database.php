@@ -32,11 +32,11 @@ class Database extends Config
      */
     public $default = [
         'DSN'      => '',
-        'hostname' => '10.0.0.4',
-        'username' => 'IIoT-center',
-        'password' => 'Snc@2022',
-        'database' => 'iSAS',
-        'DBDriver' => 'sqlsrv',
+        'hostname' => '',
+        'username' => '',
+        'password' => '',
+        'database' => '',
+        'DBDriver' => '',
         'DBPrefix' => '',
         'pConnect' => false,
         'DBDebug'  => (ENVIRONMENT !== 'production'),

@@ -1,0 +1,3 @@
+CRITICAL - 2023-07-16 20:15:15 --> Maximum execution time of 120 seconds exceeded
+in APPPATH\Libraries\MongoDBLibs\vendor\mongodb\mongodb\src\Operation\Aggregate.php on line 281.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
