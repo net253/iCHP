@@ -14,7 +14,7 @@ class RequestController extends BaseController
        private $lineNotify;
      public function __construct()
      {
-          $this->lineNotify = new LineNotify("lKDI8kD68mkTpOC70aoEWwiOfCgrsezJi2aYTr7KqXN");   // set Token
+          $this->lineNotify = new LineNotify("lKDI8kD68mkTpOC70aoEWwiOfCgrsezJi2aYTr7KqXN");   // set Token ใช้งานจริง
           // $this->lineNotify = new LineNotify("aFLUoCrwhZYZBZv6H4MPwMtUBNNv7qCrIDhwywtKBJ8");   // Token ทดสอบของตัวเอง
           $this->jwtUtils  = new JWTUtils();
           $this->mongo = new \MongoDB\Client("mongodb://iiot-center2:%24nc.ii0t%402o2E@10.0.0.8:27017/?authSource=admin");
@@ -27,6 +27,7 @@ class RequestController extends BaseController
           try {          
                $EmployeeNumber      = $this->request->getVar("EmployeeNumber");
                $PetitionerName      = $this->request->getVar("PetitionerName");
+               $PetitionerEmail     = $this->request->getVar("PetitionerEmail");
                $SNCCompany          = $this->request->getVar("SNCCompany");
                $Department          = $this->request->getVar("Department");
                $Phone               = $this->request->getVar("Phone");
@@ -41,7 +42,7 @@ class RequestController extends BaseController
 
                $validate =  is_null($EmployeeNumber )  || is_null($PetitionerName)    || is_null($SNCCompany)    || is_null($Department)           ||         
                             is_null($Phone)            || is_null($WebsiteName)       || is_null($RequestType)   || is_null($RequirementDetails)   ||
-                            is_null($OperationDate)    || is_null($ManagerFullName)   || is_null($ManagerEmail);
+                            is_null($OperationDate)    || is_null($ManagerFullName)   || is_null($ManagerEmail)  || is_null($PetitionerEmail);
                
                if ($validate) return $this->response->setStatusCode(400)->setJSON(["state" => false, "msg" => "กรอกข้อมูลไม่ครบถ้วน"]);
 
@@ -71,6 +72,7 @@ class RequestController extends BaseController
                     "RunNo"               =>  $RunNo,
                     "EmployeeNumber"      =>  $EmployeeNumber,
                     "PetitionerName"      =>  $PetitionerName,
+                    "PetitionerEmail"     =>  $PetitionerEmail,
                     "SNCCompany"          =>  $SNCCompany,
                     "Department"          =>  $Department,
                     "Phone"               =>  $Phone,
@@ -130,6 +132,7 @@ class RequestController extends BaseController
                     $data2 = [
                          "EmployeeNumber"      =>  $EmployeeNumber,
                          "PetitionerName"      =>  $PetitionerName,
+                         "PetitionerEmail"     =>  $PetitionerEmail,
                          "SNCCompany"          =>  $SNCCompany,
                          "Department"          =>  $Department,
                          "Phone"               =>  $Phone,
@@ -139,6 +142,7 @@ class RequestController extends BaseController
                     $filter = ["EmployeeNumber" => "$EmployeeNumber"];
                     $dataforUpdate = [
                          "PetitionerName"      =>  $PetitionerName,
+                         "PetitionerEmail"     =>  $PetitionerEmail,
                          "SNCCompany"          =>  $SNCCompany,
                          "Department"          =>  $Department,
                          "Phone"               =>  $Phone,
@@ -214,7 +218,7 @@ class RequestController extends BaseController
 ระบบ: $WebsiteName
 ประเภทคำร้อง: $RequestType
 
-คุณ $ManagerFullName: อนุมัติคำร้องขอแล้ว
+คุณ$ManagerFullName: อนุมัติคำร้องขอแล้ว
                ");      
 
                return $this->response->setJSON(["state" => true, "msg" => "Manager อนุมัติคำร้องขอแล้ว"]);
@@ -227,7 +231,7 @@ class RequestController extends BaseController
 ระบบ: $WebsiteName
 ประเภทคำร้อง: $RequestType
 
-คุณ $ManagerFullName: ไม่อนุมัติคำร้องขอ
+คุณ$ManagerFullName: ไม่อนุมัติคำร้องขอ
 เหตุผลที่ไม่อนุมัติ: $ManagerRemarks
                ");      
                return $this->response->setJSON(["state" => true, "msg" => "Manager ไม่อนุมัติคำร้องขอ"]);
@@ -261,8 +265,6 @@ class RequestController extends BaseController
 
                 $this->dbiPMS->selectCollection("iCHP")->updateOne($filter, ['$set' => $data]);
            
-                // return $this->response->setJSON(["state" => true, "msg" => "Operator อนุมัติแล้ว"]);
-                // return $this->response->setJSON(["state" => true, "msg" => "Manager อนุมัติแล้ว"]);
                 $pipeline = [
                     [
                     '$match' => [
@@ -394,7 +396,7 @@ class RequestController extends BaseController
 ประเภทคำร้อง: $RequestType
 
 **คำร้องขอนี้ดำเนินการไม่สำเร็จ**
-สาเหตุ: $SoftwareRemarks
+เหตุผล: $SoftwareRemarks
                ");      
                     return $this->response->setJSON(["state" => true, "msg" => "Software ไม่ดำเนินการ"]);
 
@@ -468,7 +470,7 @@ class RequestController extends BaseController
                                    ]
                                ],
                                ['$project' => [
-                                   '_id' => 0, 'RequestID' => ['$toString' => '$_id'], 'EmployeeNumber' => 1, 'PetitionerName' => 1, 
+                                   '_id' => 0, 'RequestID' => ['$toString' => '$_id'], 'EmployeeNumber' => 1, 'PetitionerName' => 1, 'PetitionerEmail' => 1,
                                    'SNCCompany' => 1, 'Department' => 1, 'Phone' => 1, 'WebsiteName' => 1, 'RequestType' => 1, 'RequirementDetails' => 1, 
                                    'OperationDate' => 1, 'CreatedDT' => ['$dateToString' => ['date' => '$CreatedDT', 'timezone' => 'Asia/Bangkok', 'format' => '%Y-%m-%d %H:%M:%S']], 
                                    'InformationRequire' => 1, 'ManagerFullName' => 1, 'ManagerEmail' => 1, 'IsApprove' => 1, 'ManagerRemarks' => 1, 
@@ -560,10 +562,11 @@ class RequestController extends BaseController
                            '_id' => 0, 
                            'AccountID' => ['$toString' => '$_id'], 
                            'EmployeeNumber' => 1, 
-                           'PetitionerName' => 1 ,
-                           'SNCCompany' => 1 ,
-                           'Department' => 1 ,
-                           'Phone' => 1 ,
+                           'PetitionerName' => 1,
+                           'PetitionerEmail' => 1,
+                           'SNCCompany' => 1,
+                           'Department' => 1,
+                           'Phone' => 1,
 
                            ]
                       ]
